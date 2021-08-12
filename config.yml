@@ -1,0 +1,9 @@
+embedding_dim: 620
+hidden_dim: 1000
+attention_dim: 1000
+maxout_dim: 500
+max_sentence_length: 50
+vocab_size: 30000
+beam_size: 2000
+p: 0.95
+lr: 0.000001
