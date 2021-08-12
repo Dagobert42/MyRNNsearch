@@ -5,6 +5,23 @@ import torch.nn.functional as F
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# first a simple encoder-decoder model was implemented
-# to develop an understanding of the task at hand
-# and obtain a baseline on NMT performance
+######################_ENCODER_######################
+
+class Encoder(nn.Module):
+    pass
+######################_ATTENTION_######################
+
+class Attention(nn.Module):
+    pass
+
+######################_DECODER_######################
+
+class Decoder(nn.Module):
+    pass
+
+######################_RNNsearch_######################
+
+class RNNsearch(nn.Module):
+
+    def beam_search(self, decoder_out, k):
+        pass

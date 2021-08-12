@@ -1,12 +1,7 @@
-# As suggested by [cite slideshow] we decided to follow the common prototyping paradigm of test-driven development [cite]
-# Thereby, every functionality of the project is supposed to be required first by a dedicated test fixture.
-# Tests are first implemented in simple fashion in tests.py. Once such a failing test fixture is conceived 
-# we set about implementing code to satisfy its conditions. The intent is to keep iterating over test-code
-# and related production-code until the desired functionality is achieved.
-
 import unittest
 import math
 import data, model, run
+import torch
 import spacy
 import tensorflow_datasets as tfds
 
@@ -39,38 +34,67 @@ class DataFixture(unittest.TestCase):
     def test_vocabulary(self):
         test_vocab = data.Vocab(TEST_CORPUS_EN)
         # run some test on our implementation of vocabulary
-        self.assertEqual(test_vocab.get_word(0), '<S>')
-        self.assertEqual(test_vocab.get_word(3), 'The')
-        self.assertEqual(test_vocab.get_word(5), 'project')
-        self.assertEqual(test_vocab.get_id('The'), 3)
-        self.assertEqual(test_vocab.get_id('project'), 5)
-        self.assertEqual(test_vocab.get_count('the'), 2)
-        self.assertEqual(test_vocab.get_count('project'), 2)
+        self.assertEqual(test_vocab.ids[0], '<S>')
+        self.assertEqual(test_vocab.ids[3], 'The')
+        self.assertEqual(test_vocab.ids[5], 'project')
+        self.assertEqual(test_vocab.words['The'].id, 3)
+        self.assertEqual(test_vocab.words['project'].id, 5)
+        self.assertEqual(test_vocab.words['the'].count, 2)
+        self.assertEqual(test_vocab.words['project'].count, 2)
 
     def test_spacy_option(self):
         english_nlp = spacy.load('en_core_web_sm')
         test_vocab = data.Vocab(TEST_CORPUS_EN, spacy_nlp=english_nlp)
         M = "Make sure to have required SpaCy packages installed."
-        self.assertEqual(test_vocab.get_word(0), '<S>')
-        self.assertEqual(test_vocab.get_word(3), 'The')
-        self.assertEqual(test_vocab.get_word(5), 'project')
-        self.assertEqual(test_vocab.get_id('The'), 3)
-        self.assertEqual(test_vocab.get_id('project'), 5)
-        self.assertEqual(test_vocab.get_count('the'), 2)
-        self.assertEqual(test_vocab.get_count('project'), 2)
+        self.assertEqual(test_vocab.ids[0], '<S>')
+        self.assertEqual(test_vocab.ids[3], 'The')
+        self.assertEqual(test_vocab.ids[5], 'project')
+        self.assertEqual(test_vocab.words['The'].id, 3)
+        self.assertEqual(test_vocab.words['project'].id, 5)
+        self.assertEqual(test_vocab.words['the'].count, 2)
+        self.assertEqual(test_vocab.words['project'].count, 2)
 
     def test_vocab_filter(self):
         test_vocab = data.Vocab(TEST_CORPUS_EN)
         top_30 = test_vocab.slice(n_samples=30)
-        self.assertEqual(len(top_30), 30)
+        self.assertEqual(len(test_vocab.words), 30)
+        self.assertEqual(len(top_30.words), 30)
+        self.assertEqual(top_30, test_vocab)
+
+    def test_sentence_to_indeces(self):
+        test_vocab = data.Vocab(TEST_CORPUS_EN)
+        vec = test_vocab.get_indeces("This is a test")
+        self.assertListEqual(vec, [2, 24, 8, 22, 1])
+        sent = test_vocab.get_sentence(vec)
+        self.assertEqual(sent, '<U> is a test <E>')
+
+class ModelFixture(unittest.TestCase):
+
+    def test_encoder(self):
+        dummy = model.Encoder(10, 10, 10)
+
+    def test_guess_anything(self):
+        test_tensor = torch.zeros(30, dtype=torch.long).view(-1, 1)
+        dummy = model.RNNsearch(10, 10, 10, 10, 10)
+        out = dummy(test_tensor, test_tensor, 0)
+        self.assertIsInstance(out, torch.Tensor)
+
+    def test_init_weights(self):
+        pass
+
+    def test_get_single_translation(self):
+        test_tensor = torch.zeros(30, dtype=torch.long).view(-1, 1)
+        dummy = model.RNNsearch(10, 10, 10, 10, 10)
+        out = dummy(test_tensor, test_tensor, 0)
+        self.assertIsInstance(out, torch.Tensor)
 
 class RunFixture(unittest.TestCase):
 
-    def test_another(self):
-        self.assertAlmostEqual(1,1)
+    def test_batching(self):
+        pass
 
-    def test_more(self):
-        self.assertAlmostEqual(1,1)
+    def test_evaluate_model(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
